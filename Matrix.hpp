@@ -16,8 +16,26 @@ inline Matrix sumar(const Matrix& A, const Matrix& B, int size = N) {
     return res;
 }
 
+inline Matrix parSumar(const Matrix& A, const Matrix& B, int size = N) {
+    Matrix res = {0};
+    #pragma omp parallel collapse(2)
+    for (int i = 0; i < size; i++)
+        for (int j = 0; j < size; j++)
+            res[i][j] = A[i][j] + B[i][j];
+    return res;
+}
+
 inline Matrix restar(const Matrix& A, const Matrix& B, int size = N) {
     Matrix res = {0};
+    for (int i = 0; i < size; i++)
+        for (int j = 0; j < size; j++)
+            res[i][j] = A[i][j] - B[i][j];
+    return res;
+}
+
+inline Matrix parRestar(const Matrix& A, const Matrix& B, int size = N) {
+    Matrix res = {0};
+    #pragma omp parallel collapse(2)
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
             res[i][j] = A[i][j] - B[i][j];
