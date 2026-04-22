@@ -1,11 +1,13 @@
+#ifndef SEQUENTIAL
+#define SEQUENTIAL
 #include "Matrix.hpp"
 
 Matrix seqClassic(const Matrix& A, const Matrix& B, int size) {
-    Matrix C = {0};
+    Matrix C(size);
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             for (int k = 0; k < size; k++) {
-                C[i][j] += A[i][k] * B[k][j];
+                C(i, j) += A(i, k) * B(k, j);
             }
         }
     }
@@ -13,13 +15,13 @@ Matrix seqClassic(const Matrix& A, const Matrix& B, int size) {
 }
 
 Matrix seqTiling(const Matrix& A, const Matrix& B, int size, int b) {
-    Matrix C = {0};
+    Matrix C(size);
     for (int i = 0; i < size / b; i++) {
         for (int j = 0; j < size / b; j++) {
             for (int k = 0; k < b; k++) {
                 for (int l = 0; l < b; l++) {
                     for (int t = 0; t < size; t++) {
-                        C[(i * b) + k][(j * b) + l] += A[(i * b) + k][t] * B[t][(j * b) + l];
+                        C((i * b) + k, (j * b) + l) += A((i * b) + k, t) * B(t, (j * b) + l);
                     }
                 }
             }
@@ -34,21 +36,26 @@ Matrix seqStrassen(const Matrix& A, const Matrix& B, int size) {
     }
 
     int m = size / 2;
-    Matrix a11 = {0}, a12 = {0}, a21 = {0}, a22 = {0};
-    Matrix b11 = {0}, b12 = {0}, b21 = {0}, b22 = {0};
-
+    Matrix a11(m);
+    Matrix a12(m);
+    Matrix a21(m);
+    Matrix a22(m);
+    Matrix b11(m);
+    Matrix b12(m);
+    Matrix b21(m);
+    Matrix b22(m);
 
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < m; j++) {
-            a11[i][j] = A[i][j];
-            a12[i][j] = A[i][j + m];
-            a21[i][j] = A[i + m][j];
-            a22[i][j] = A[i + m][j + m];
+            a11(i, j) = A(i, j);
+            a12(i, j) = A(i, j + m);
+            a21(i, j) = A(i + m, j);
+            a22(i, j) = A(i + m, j + m);
 
-            b11[i][j] = B[i][j];
-            b12[i][j] = B[i][j + m];
-            b21[i][j] = B[i + m][j];
-            b22[i][j] = B[i + m][j + m];
+            b11(i, j) = B(i, j);
+            b12(i, j) = B(i, j + m);
+            b21(i, j) = B(i + m, j);
+            b22(i, j) = B(i + m, j + m);
         }
     }
 
@@ -68,14 +75,15 @@ Matrix seqStrassen(const Matrix& A, const Matrix& B, int size) {
     Matrix c22 = sumar(restar(sumar(p1, p3, m), p2, m), p6, m);
 
     // Reconstruir matriz final
-    Matrix C = {0};
+    Matrix C(size);
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < m; j++) {
-            C[i][j] = c11[i][j];
-            C[i][j + m] = c12[i][j];
-            C[i + m][j] = c21[i][j];
-            C[i + m][j + m] = c22[i][j];
+            C(i, j) = c11(i, j);
+            C(i, j + m) = c12(i, j);
+            C(i + m, j) = c21(i, j);
+            C(i + m, j + m) = c22(i, j);
         }
     }
     return C;
 }
+#endif
