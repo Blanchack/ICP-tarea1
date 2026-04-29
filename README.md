@@ -2,14 +2,11 @@
 # Tarea1 ICP
 Integrantes:  
 Alex Blanchard Ortiz  
-Lenin  
-PorritoBoys
+Lenin Valeria Rivas  
+Ignacio Diaz Barrientos
+# Compilacion
+Los archivos main.cpp main_parte2.cpp deben ser compilados usando el comando:  
+`g++ -O3 -fopenmp nombre_del_archivo -o main`  
 
 
-## TO DO
-
-#### Cambiar main.cpp pq esta todo gpetiao x experimentos
-#### Cambiar el readme
-##### los experimentos deberian incluir diferentes valores de "b" para el tiling, y diferentes valores de n
-#### Informe
-# cualquier duda de complejidad webeen al wsp
+El archivo profiler puede ser compilado y ejecutado directanmente desde `profiling.sh`
