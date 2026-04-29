@@ -1,65 +1,51 @@
-#include "parallel.cpp"
 #include "sequential.cpp"
 #include <chrono>
+#include <iostream>
+#include <vector>
 
+using namespace std;
 using namespace std::chrono;
 
 int main() {
-    Matrix matrixA(N), matrixB(N);
-    for (int i = 0; i < N; i++)
-        for (int j = 0; j < N; j++) {
-            //printf("%d ", i);
-            matrixA(i, j) = i + 1;
-            matrixB(i, j) = i + 2;
-        }
+    // Tamaños requeridos por la tarea
+    vector<int> tamanos = {256, 512, 1024, 2048, 4096};
 
-    // Macro para medir tiempo de cualquier llamada
-    #define TIMED(label, call, result)                                          \
-        auto start_##result = high_resolution_clock::now();                     \
-        Matrix result = call;                                                   \
-        auto end_##result = high_resolution_clock::now();                       \
-        double ms_##result = duration<double, std::milli>(                      \
-            end_##result - start_##result).count();
+    cout << "=== EXPERIMENTOS PARTE 1: ALGORITMOS SECUENCIALES (1 EJECUCION) ===" << endl;
+    cout << "N\tClasico(ms)\tTiling(ms, b=64)\tStrassen(ms)" << endl;
 
-    TIMED("Clásico",           seqClassic(matrixA, matrixB, N),           resClassic)
-    TIMED("Tiling Seq",          seqTiling(matrixA, matrixB, N, 64),        resTiling)
-    TIMED("Strassen Seq",        seqStrassen(matrixA, matrixB, N),         resStrassen)
-    TIMED("Tiling Paralelo",     parTiling(matrixA, matrixB, N, 64),        resParTiling)
-    TIMED("Strassen Paralelo",   parStrassen(matrixA, matrixB, N),         resParStrassen)
-    TIMED("Hibrido",            parHybrid(matrixA, matrixB, N),            resHybrid)
+    for (int n : tamanos) {
+        Matrix A(n, 1), B(n, 2);
 
-    //imprimir(matrixA,        "Matriz A");
-    //imprimir(matrixB,        "Matriz B");
+        // 1. Clasico
+        auto s1 = high_resolution_clock::now();
+        seqClassic(A, B, n);
+        double t_cla = duration<double, milli>(high_resolution_clock::now() - s1).count();
 
-    //imprimir(resClassic,     "Resultado Clásico");
-    printf("  ⏱  Tiempo Clásico:            %.4f ms\n\n", ms_resClassic);
+        // 2. Tiling (bloque fijo 64)
+        auto s2 = high_resolution_clock::now();
+        seqTiling(A, B, n, 64);
+        double t_til = duration<double, milli>(high_resolution_clock::now() - s2).count();
 
-    //imprimir(resTiling,      "Resultado Tiling (b=2)");
-    printf("  ⏱  Tiempo Tiling Seq:         %.4f ms\n\n", ms_resTiling);
+        // 3. Strassen
+        auto s3 = high_resolution_clock::now();
+        seqStrassen(A, B, n);
+        double t_str = duration<double, milli>(high_resolution_clock::now() - s3).count();
 
-    //imprimir(resStrassen,    "Resultado Strassen");
-    printf("  ⏱  Tiempo Strassen Seq:       %.4f ms\n\n", ms_resStrassen);
+        cout << n << "\t" << t_cla << "\t" << t_til << "\t" << t_str << endl;
+    }
 
-    //imprimir(resParTiling,   "Resultado Tiling Paralelo");
-    printf("  ⏱  Tiempo Tiling Paralelo:    %.4f ms\n\n", ms_resParTiling);
+    // --- EXPERIMENTO 5.1.2: EFECTO DE B ---
+    cout << "\n=== EXPERIMENTO 5.1.2: EFECTO DEL TAMANO DE BLOQUE (N=1024) ===" << endl;
+    cout << "b\tTiempo(ms)" << endl;
+    vector<int> bloques = {16, 32, 64, 128, 256};
+    Matrix A1024(1024, 1), B1024(1024, 2);
 
-    //imprimir(resParStrassen, "Resultado Strassen Paralelo");
-    printf("  ⏱  Tiempo Strassen Paralelo:  %.4f ms\n\n", ms_resParStrassen);
-
-    printf("  ⏱  Tiempo Hibrido:  %.4f ms\n\n", ms_resHybrid);
-
-
-    // Tabla resumen
-    printf("┌─────────────────────────┬──────────────┐\n");
-    printf("│ Algoritmo               │ Tiempo (ms)  │\n");
-    printf("├─────────────────────────┼──────────────┤\n");
-    printf("│ Clásico                 │ %12.4f │\n", ms_resClassic);
-    printf("│ Tiling Seq (b=64)        │ %12.4f │\n", ms_resTiling);
-    printf("│ Strassen Seq            │ %12.4f │\n", ms_resStrassen);
-    printf("│ Tiling Paralelo (b=64)   │ %12.4f │\n", ms_resParTiling);
-    printf("│ Strassen Paralelo       │ %12.4f │\n", ms_resParStrassen);
-    printf("│ Hibrido                 │ %12.4f │\n", ms_resHybrid);
-    printf("└─────────────────────────┴──────────────┘\n");
+    for (int b : bloques) {
+        auto s = high_resolution_clock::now();
+        seqTiling(A1024, B1024, 1024, b);
+        double t_b = duration<double, milli>(high_resolution_clock::now() - s).count();
+        cout << b << "\t" << t_b << endl;
+    }
 
     return 0;
 }
